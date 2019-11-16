@@ -1,1 +1,2 @@
-# 2019FS-deep-learning-course-project
+# Deep-learning-course-project
+2019 Fall semester, Yonsei University
