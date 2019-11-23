@@ -13,7 +13,7 @@ import warnings
 from tensorflow import keras
 import numpy as np
 from tensorflow.data import Dataset
-from image import *
+from engine.image import *
 import tensorflow.image
 
 import numpy as np
@@ -45,7 +45,10 @@ def load_data(paths, train = True):
 
 
 def load_datasets():
-
+	'''
+	objective: load datasets from lists of paths and apply load function
+	return: train_dataset, test_dataset - tf.data.Dataset
+	'''
 	train_list, test_list = load_data_list()
 
 	# load dataset from generator defined as load_data
@@ -77,7 +80,9 @@ def grad(model, input_image, gt_image):
 	return tape.gradient(loss, model.trainable_weights)
 
 def fit(model, epochs, learning_rate = 0.01):
-
+	# temporarily use 10 subsets of datasets 
+	# needs to be updated before submitted
+	
 	train_dataset, test_dataset = load_datasets()
 	optimizer = tf.keras.optimizers.Adam(learning_rate = learning_rate)
 	
@@ -92,7 +97,7 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = 0
     
 		# train process
-		for step, (images, gt_images) in enumerate(train_dataset):
+		for step, (images, gt_images) in enumerate(train_dataset.take(10)):
 
 			grads = grad(model, images, gt_images)
 			optimizer.apply_gradients(zip(grads, model.trainable_variables))
@@ -103,7 +108,7 @@ def fit(model, epochs, learning_rate = 0.01):
 		avg_loss = avg_loss / train_step
 
 		# test process
-		for step, (images, gt_images) in enumerate(test_dataset): 
+		for step, (images, gt_images) in enumerate(test_dataset.take(10)): 
 
 			output = model(np.expand_dims(images,0))
 			test_step += 1

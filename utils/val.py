@@ -6,6 +6,11 @@ from matplotlib import cm as c
 from matplotlib import pyplot as plt
 
 def generate_images(model, test_input = '../ShanghaiTech/part_A/test_data/images/IMG_100.jpg'):
+    '''
+    objective: visualize original count and predicted count 
+    param: model - tf.keras.model
+           test_input - path to the original image
+    '''
     img = tf.io.read_file(test_input)
     img = tf.image.decode_jpeg(img, channels = 3)
     img = tf.cast(img, tf.float32)
