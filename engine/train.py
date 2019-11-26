@@ -35,6 +35,12 @@ def load_data(paths, train = True):
         img = tf.cast(img, tf.float32)
         img = (img/127.5) - 1 # normalizing the images to [-1, 1]
 
+        # another option
+    	# img = img/255.0
+	    # img[:,:,0]=(img[:,:,0]-0.485)/0.229
+	    # img[:,:,1]=(img[:,:,1]-0.456)/0.224
+	    # img[:,:,2]=(img[:,:,2]-0.406)/0.225
+
         gt_file = h5py.File(gt_path, 'r')
         target = np.asarray(gt_file['density'])
 
@@ -65,7 +71,7 @@ def loss_fn(model, input_image, gt_image):
 	objective: calculate loss from input image and ground-truth
 	return: loss 
 	'''
-	output = model(np.expand_dims(input_image,0), training=True)
+	output = model(np.expand_dims(input_image,0), training = True)
 	output = tf.squeeze(output, [0,3])
     # mean squared error
 	loss = tf.reduce_mean(tf.square(output - gt_image))
