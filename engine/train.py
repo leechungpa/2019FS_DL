@@ -55,16 +55,27 @@ def load_datasets():
 	objective: load datasets from lists of paths and apply load function
 	return: train_dataset, test_dataset - tf.data.Dataset
 	'''
-	train_list, test_list = load_data_list()
+	train_a_list, test_a_list, train_b_list, test_b_list = load_data_list()
 
+	# part_A
 	# load dataset from generator defined as load_data
-	train_dataset = tf.data.Dataset.from_generator(
-		load_data, args = [train_list],output_types = (tf.float32, tf.float32), output_shapes = ((None,None,3), (None,None)))
-	train_dataset = train_dataset.shuffle(100000)
+	train_a_dataset = tf.data.Dataset.from_generator(
+		load_data, args = [train_a_list],output_types = (tf.float32, tf.float32), output_shapes = ((None,None,3), (None,None)))
+	train_a_dataset = train_a_dataset.shuffle(100000)
 
-	test_dataset = tf.data.Dataset.from_generator(
-		load_data, args = [test_list], output_types = (tf.float32, tf.float32), output_shapes = ((None,None,3), (None,None)))
-	return train_dataset, test_dataset
+	test_a_dataset = tf.data.Dataset.from_generator(
+		load_data, args = [test_a_list], output_types = (tf.float32, tf.float32), output_shapes = ((None,None,3), (None,None)))
+	
+	# part_B
+	train_b_dataset = tf.data.Dataset.from_generator(
+		load_data, args = [train_b_list],output_types = (tf.float32, tf.float32), output_shapes = ((None,None,3), (None,None)))
+	train_b_dataset = train_b_dataset.shuffle(100000)
+
+	test_b_dataset = tf.data.Dataset.from_generator(
+		load_data, args = [test_b_list], output_types = (tf.float32, tf.float32), output_shapes = ((None,None,3), (None,None)))
+	
+
+	return train_a_dataset, test_a_dataset, train_b_dataset, test_b_dataset
 
 def loss_fn(model, input_image, gt_image):
 	'''
@@ -89,11 +100,11 @@ def fit(model, epochs, learning_rate = 0.01):
 	# temporarily use 10 subsets of datasets 
 	# needs to be updated before submitted
 	
-	train_dataset, test_dataset = load_datasets()
+	train_a_dataset, test_a_dataset, train_b_dataset, test_b_dataset = load_datasets()
 	optimizer = tf.keras.optimizers.Adam(learning_rate = learning_rate)
 	
 	# train model
-	print('Learning started. It takes sometime.')
+	print('Part A Learning started. It takes sometime.')
 
 	for epoch in range(epochs):
 		# init values
@@ -103,7 +114,7 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = 0
     
 		# train process
-		for step, (images, gt_images) in enumerate(train_dataset.take(10)):
+		for step, (images, gt_images) in enumerate(train_a_dataset):
 
 			grads = grad(model, images, gt_images)
 			optimizer.apply_gradients(zip(grads, model.trainable_variables))
@@ -114,7 +125,44 @@ def fit(model, epochs, learning_rate = 0.01):
 		avg_loss = avg_loss / train_step
 
 		# test process
-		for step, (images, gt_images) in enumerate(test_dataset.take(10)): 
+		for step, (images, gt_images) in enumerate(test_a_dataset): 
+
+			output = model(np.expand_dims(images,0))
+			test_step += 1
+
+			test_mae += abs(np.sum(output)-np.sum(gt_images))
+
+		test_mae = test_mae / test_step
+
+
+		print('Epoch:', '{}'.format(epoch + 1), 'loss =', '{:.8f}'.format(avg_loss), 
+		      'Test MAE = ', '{:.4f}'.format(test_mae))
+
+		print('Learning Finished!')
+
+	# train model
+	print('Part B Learning started. It takes sometime.')
+
+	for epoch in range(epochs):
+		# init values
+		avg_loss = 0.
+		train_step = 0
+		test_step = 0
+		test_mae = 0
+    
+		# train process
+		for step, (images, gt_images) in enumerate(train_b_dataset):
+
+			grads = grad(model, images, gt_images)
+			optimizer.apply_gradients(zip(grads, model.trainable_variables))
+			loss = loss_fn(model, images, gt_images)
+			avg_loss += loss
+			train_step += 1
+
+		avg_loss = avg_loss / train_step
+
+		# test process
+		for step, (images, gt_images) in enumerate(test_b_dataset): 
 
 			output = model(np.expand_dims(images,0))
 			test_step += 1
