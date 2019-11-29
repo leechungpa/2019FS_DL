@@ -175,5 +175,5 @@ def fit(model, epochs, learning_rate = 0.01):
 		print('Epoch:', '{}'.format(epoch + 1), 'loss =', '{:.8f}'.format(avg_loss), 
 		      'Test MAE = ', '{:.4f}'.format(test_mae))
 
-		print('Learning Finished!')
+	print('Learning Finished!')
 
