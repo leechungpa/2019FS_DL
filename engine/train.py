@@ -112,7 +112,10 @@ def fit(model, epochs, learning_rate = 0.01):
 		train_step = 0
 		test_step = 0
 		test_mae = 0
-    
+
+		loss_list_a = []
+    	progress = ProgressMonitor(length=len(train_a_dataset))
+
 		# train process
 		for step, (images, gt_images) in enumerate(train_a_dataset):
 
@@ -121,6 +124,9 @@ def fit(model, epochs, learning_rate = 0.01):
 			loss = loss_fn(model, images, gt_images)
 			avg_loss += loss
 			train_step += 1
+
+			loss_list_a.append(loss)
+        	progress.update(step, sum(loss_list_a)/len(loss_list_a))
 
 		avg_loss = avg_loss / train_step
 
@@ -149,6 +155,9 @@ def fit(model, epochs, learning_rate = 0.01):
 		train_step = 0
 		test_step = 0
 		test_mae = 0
+
+		loss_list_a = []
+    	progress = ProgressMonitor(length=len(train_b_dataset))
     
 		# train process
 		for step, (images, gt_images) in enumerate(train_b_dataset):
@@ -158,6 +167,10 @@ def fit(model, epochs, learning_rate = 0.01):
 			loss = loss_fn(model, images, gt_images)
 			avg_loss += loss
 			train_step += 1
+
+			loss_list_a.append(loss)
+        	progress.update(step, sum(loss_list_b)/len(loss_list_b))
+
 
 		avg_loss = avg_loss / train_step
 
