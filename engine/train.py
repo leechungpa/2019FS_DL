@@ -33,13 +33,13 @@ def load_data(paths, train = True):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels = 3)
         img = tf.cast(img, tf.float32)
-        img = (img/127.5) - 1 # normalizing the images to [-1, 1]
+        # img = (img/127.5) - 1 # normalizing the images to [-1, 1]
 
         # another option
-    	# img = img/255.0
-	    # img[:,:,0]=(img[:,:,0]-0.485)/0.229
-	    # img[:,:,1]=(img[:,:,1]-0.456)/0.224
-	    # img[:,:,2]=(img[:,:,2]-0.406)/0.225
+    	img = img/255.0
+	    img[:,:,0]=(img[:,:,0]-0.485)/0.229
+	    img[:,:,1]=(img[:,:,1]-0.456)/0.224
+	    img[:,:,2]=(img[:,:,2]-0.406)/0.225
 
         gt_file = h5py.File(gt_path, 'r')
         target = np.asarray(gt_file['density'])
