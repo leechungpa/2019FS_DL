@@ -36,10 +36,10 @@ def load_data(paths, train = True):
         # img = (img/127.5) - 1 # normalizing the images to [-1, 1]
 
         # another option
-    	img = img/255.0
-	    img[:,:,0]=(img[:,:,0]-0.485)/0.229
-	    img[:,:,1]=(img[:,:,1]-0.456)/0.224
-	    img[:,:,2]=(img[:,:,2]-0.406)/0.225
+        img = img/255.0
+        img[:,:,0]=(img[:,:,0]-0.485)/0.229
+        img[:,:,1]=(img[:,:,1]-0.456)/0.224
+        img[:,:,2]=(img[:,:,2]-0.406)/0.225
 
         gt_file = h5py.File(gt_path, 'r')
         target = np.asarray(gt_file['density'])
@@ -114,7 +114,7 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = 0
 
 		loss_list_a = []
-    	progress = ProgressMonitor(length=len(train_a_dataset))
+		progress = ProgressMonitor(length=len(train_a_dataset))
 
 		# train process
 		for step, (images, gt_images) in enumerate(train_a_dataset):
@@ -126,7 +126,7 @@ def fit(model, epochs, learning_rate = 0.01):
 			train_step += 1
 
 			loss_list_a.append(loss)
-        	progress.update(step, sum(loss_list_a)/len(loss_list_a))
+			progress.update(step, sum(loss_list_a)/len(loss_list_a))
 
 		avg_loss = avg_loss / train_step
 
@@ -157,8 +157,8 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = 0
 
 		loss_list_a = []
-    	progress = ProgressMonitor(length=len(train_b_dataset))
-    
+		progress = ProgressMonitor(length=len(train_b_dataset))
+
 		# train process
 		for step, (images, gt_images) in enumerate(train_b_dataset):
 
@@ -169,7 +169,7 @@ def fit(model, epochs, learning_rate = 0.01):
 			train_step += 1
 
 			loss_list_a.append(loss)
-        	progress.update(step, sum(loss_list_b)/len(loss_list_b))
+			progress.update(step, sum(loss_list_b)/len(loss_list_b))
 
 
 		avg_loss = avg_loss / train_step
