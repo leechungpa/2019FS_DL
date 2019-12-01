@@ -20,6 +20,7 @@ import numpy as np
 import json
 import cv2
 import time
+import json
 
 
 def load_data(paths, train = True):
@@ -35,11 +36,6 @@ def load_data(paths, train = True):
         img = tf.cast(img, tf.float32)
         img = img/255.0  # normalizing the images to [0,1]
 
-        # another option
-        # img[:,:,0]=(img[:,:,0]-0.485)/0.229
-        # img[:,:,1]=(img[:,:,1]-0.456)/0.224
-        # img[:,:,2]=(img[:,:,2]-0.406)/0.225
-
         gt_file = h5py.File(gt_path, 'r')
         target = np.asarray(gt_file['density'])
 
@@ -48,6 +44,21 @@ def load_data(paths, train = True):
 
         yield (img, target)
 
+def load_best_vals():
+	val = json.load(open('best_vals.txt', 'r'))
+	return val['best_mae_a'], val['best_mae_b']
+
+def reset_best_vals(best_mae_a, best_mae_b):
+	'''
+	objective: store best mae values from previous models
+	'''
+	mae_dict = {
+		'best_mae_a': best_mae_a,
+		'best_mae_b': best_mae_b
+	}
+
+	with open('../best_vals.txt', 'w') as json_file:
+		json.dump(mae_dict, json_file)
 
 def load_datasets():
 	'''
@@ -96,12 +107,13 @@ def grad(model, input_image, gt_image):
 	return tape.gradient(loss, model.trainable_weights)
 
 def fit(model, epochs, learning_rate = 0.01):
-	# temporarily use 10 subsets of datasets 
-	# needs to be updated before submitted
 	
 	train_a_dataset, test_a_dataset, train_b_dataset, test_b_dataset = load_datasets()
 	optimizer = tf.keras.optimizers.Adam(learning_rate = learning_rate)
 	
+	# get lowest mae from previous trained models to compare
+	# if it's lower than those values, store the whole model into h5 file
+	best_mae_a, best_mae_b = load_best_vals()
 	# train model
 	print('Part A Learning started. It takes sometime.')
 
@@ -142,6 +154,11 @@ def fit(model, epochs, learning_rate = 0.01):
 
 		print('Epoch:', '{}'.format(epoch + 1), 'loss =', '{:.8f}'.format(avg_loss), 
 		      'Test MAE = ', '{:.4f}'.format(test_mae))
+
+	if (test_mae > best_mae_a): 
+		best_mae_a = test_mae
+		model.save('part_a_best_model_{}.h5'.format(epochs))
+		reset_best_vals(best_mae_a, best_mae_b)
 
 	print('Learning Finished!')
 
@@ -186,6 +203,11 @@ def fit(model, epochs, learning_rate = 0.01):
 
 		print('Epoch:', '{}'.format(epoch + 1), 'loss =', '{:.8f}'.format(avg_loss), 
 		      'Test MAE = ', '{:.4f}'.format(test_mae))
+
+	if (test_mae > best_mae_b):
+		best_mae_b = test_mae 
+		model.save('part_b_best_model_{}.h5'.format(epochs))
+		reset_best_vals(best_mae_a, best_mae_b)
 
 	print('Learning Finished!')
 
