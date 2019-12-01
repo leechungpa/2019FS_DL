@@ -33,13 +33,12 @@ def load_data(paths, train = True):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels = 3)
         img = tf.cast(img, tf.float32)
-        # img = (img/127.5) - 1 # normalizing the images to [-1, 1]
+        img = img/255.0  # normalizing the images to [0,1]
 
         # another option
-        img = img/255.0
-        img[:,:,0]=(img[:,:,0]-0.485)/0.229
-        img[:,:,1]=(img[:,:,1]-0.456)/0.224
-        img[:,:,2]=(img[:,:,2]-0.406)/0.225
+        # img[:,:,0]=(img[:,:,0]-0.485)/0.229
+        # img[:,:,1]=(img[:,:,1]-0.456)/0.224
+        # img[:,:,2]=(img[:,:,2]-0.406)/0.225
 
         gt_file = h5py.File(gt_path, 'r')
         target = np.asarray(gt_file['density'])
@@ -114,7 +113,7 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = 0
 
 		loss_list_a = []
-		progress = ProgressMonitor(length=len(train_a_dataset))
+		progress = ProgressMonitor(length=300)
 
 		# train process
 		for step, (images, gt_images) in enumerate(train_a_dataset):
@@ -157,7 +156,7 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = 0
 
 		loss_list_a = []
-		progress = ProgressMonitor(length=len(train_b_dataset))
+		progress = ProgressMonitor(length=400)
 
 		# train process
 		for step, (images, gt_images) in enumerate(train_b_dataset):
