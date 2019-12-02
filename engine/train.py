@@ -118,10 +118,12 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 		# get lowest mae from previous trained models to compare
 		# if it's lower than those values, store the whole model into h5 file
 		best_mae, _ = load_best_vals()
+		progress_range = 44850
 
 	elif part == "B":
 		a_train, a_test, train_dataset, test_dataset = load_datasets()
 		_, best_mae = load_best_vals()
+		progress_range = 79800
 
 	else: return("Please put A or B")
 
@@ -138,7 +140,7 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 		test_mae = 0
 
 		loss_list = []
-		progress = ProgressMonitor(length = 44850)
+		progress = ProgressMonitor(length = progress_range)
 
 		# train process
 		for step, (images, gt_images) in enumerate(train_dataset):
