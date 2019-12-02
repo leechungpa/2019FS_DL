@@ -45,19 +45,22 @@ def load_data(paths, train = True):
         yield (img, target)
 
 def load_best_vals():
+	'''
+	objective: load best mae values from previous values
+	'''
 	val = json.load(open('best_vals.txt', 'r'))
 	return val['best_mae_a'], val['best_mae_b']
 
 def reset_best_vals(best_mae_a, best_mae_b):
 	'''
-	objective: store best mae values from previous models
+	objective: store best mae values 
 	'''
 	mae_dict = {
 		'best_mae_a': best_mae_a,
 		'best_mae_b': best_mae_b
 	}
-
-	with open('../best_vals.txt', 'w') as json_file:
+	# store a text file
+	with open('best_vals.txt', 'w') as json_file:
 		json.dump(mae_dict, json_file)
 
 def load_datasets():
@@ -165,6 +168,8 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 		print('Epoch:', '{}'.format(epoch + 1), 
 		      'Test MAE = ', '{:.4f}'.format(test_mae))
 
+	# when test_mae is smaller than the stored lowest mae,
+	# store whole model into h5 file
 	if (test_mae < best_mae): 
 		model.save('part_{}_best_model_{}.h5'.format(part, epochs))
 		if part == "A":
