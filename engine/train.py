@@ -106,16 +106,26 @@ def grad(model, input_image, gt_image):
 		loss = loss_fn(model, input_image, gt_image)
 	return tape.gradient(loss, model.trainable_weights)
 
-def fit(model, epochs, learning_rate = 0.01):
-	
-	train_a_dataset, test_a_dataset, train_b_dataset, test_b_dataset = load_datasets()
+def fit(model, part, epochs, learning_rate = 0.0001):
+	'''
+	train model with part variable ("A" or "B") 
+	'''
+	if part == "A":
+		train_dataset, test_dataset, b_train, b_test = load_datasets()
+		# get lowest mae from previous trained models to compare
+		# if it's lower than those values, store the whole model into h5 file
+		best_mae, _ = load_best_vals()
+
+	else if part == "B":
+		a_train, a_test, train_dataset, test_dataset = load_datasets()
+		_, best_mae = load_best_vals()
+
+	else: return("Please put A or B")
+
 	optimizer = tf.keras.optimizers.Adam(learning_rate = learning_rate)
 	
-	# get lowest mae from previous trained models to compare
-	# if it's lower than those values, store the whole model into h5 file
-	best_mae_a, best_mae_b = load_best_vals()
 	# train model
-	print('Part A Learning started. It takes sometime.')
+	print('Part {} Learning started. It takes sometime.'.format(part))
 
 	for epoch in range(epochs):
 		# init values
@@ -124,11 +134,11 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_step = 0
 		test_mae = 0
 
-		loss_list_a = []
-		progress = ProgressMonitor(length=300)
+		loss_list = []
+		progress = ProgressMonitor(length = 44850)
 
 		# train process
-		for step, (images, gt_images) in enumerate(train_a_dataset):
+		for step, (images, gt_images) in enumerate(train_dataset):
 
 			grads = grad(model, images, gt_images)
 			optimizer.apply_gradients(zip(grads, model.trainable_variables))
@@ -136,13 +146,13 @@ def fit(model, epochs, learning_rate = 0.01):
 			avg_loss += loss
 			train_step += 1
 
-			loss_list_a.append(loss)
-			progress.update(step, sum(loss_list_a)/len(loss_list_a))
+			loss_list.append(loss)
+			progress.update(step, sum(loss_list)/len(loss_list))
 
 		avg_loss = avg_loss / train_step
 
 		# test process
-		for step, (images, gt_images) in enumerate(test_a_dataset): 
+		for step, (images, gt_images) in enumerate(test_dataset): 
 
 			output = model(np.expand_dims(images,0))
 			test_step += 1
@@ -152,62 +162,16 @@ def fit(model, epochs, learning_rate = 0.01):
 		test_mae = test_mae / test_step
 
 
-		print('Epoch:', '{}'.format(epoch + 1), 'loss =', '{:.8f}'.format(avg_loss), 
+		print('Epoch:', '{}'.format(epoch + 1), 
 		      'Test MAE = ', '{:.4f}'.format(test_mae))
 
-	if (test_mae > best_mae_a): 
-		best_mae_a = test_mae
-		model.save('part_a_best_model_{}.h5'.format(epochs))
-		reset_best_vals(best_mae_a, best_mae_b)
+	if (test_mae > best_mae): 
+		model.save('part_{}_best_model_{}.h5'.format(part, epochs))
+		if part == "A":
+			reset_best_vals(test_mae, _)
+		else:
+			reset_best_vals(_, test_mae)
 
 	print('Learning Finished!')
 
-	# train model
-	print('Part B Learning started. It takes sometime.')
-
-	for epoch in range(epochs):
-		# init values
-		avg_loss = 0.
-		train_step = 0
-		test_step = 0
-		test_mae = 0
-
-		loss_list_a = []
-		progress = ProgressMonitor(length=400)
-
-		# train process
-		for step, (images, gt_images) in enumerate(train_b_dataset):
-
-			grads = grad(model, images, gt_images)
-			optimizer.apply_gradients(zip(grads, model.trainable_variables))
-			loss = loss_fn(model, images, gt_images)
-			avg_loss += loss
-			train_step += 1
-
-			loss_list_a.append(loss)
-			progress.update(step, sum(loss_list_b)/len(loss_list_b))
-
-
-		avg_loss = avg_loss / train_step
-
-		# test process
-		for step, (images, gt_images) in enumerate(test_b_dataset): 
-
-			output = model(np.expand_dims(images,0))
-			test_step += 1
-
-			test_mae += abs(np.sum(output)-np.sum(gt_images))
-
-		test_mae = test_mae / test_step
-
-
-		print('Epoch:', '{}'.format(epoch + 1), 'loss =', '{:.8f}'.format(avg_loss), 
-		      'Test MAE = ', '{:.4f}'.format(test_mae))
-
-	if (test_mae > best_mae_b):
-		best_mae_b = test_mae 
-		model.save('part_b_best_model_{}.h5'.format(epochs))
-		reset_best_vals(best_mae_a, best_mae_b)
-
-	print('Learning Finished!')
-
+	
