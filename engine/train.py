@@ -165,7 +165,7 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 		print('Epoch:', '{}'.format(epoch + 1), 
 		      'Test MAE = ', '{:.4f}'.format(test_mae))
 
-	if (test_mae > best_mae): 
+	if (test_mae < best_mae): 
 		model.save('part_{}_best_model_{}.h5'.format(part, epochs))
 		if part == "A":
 			reset_best_vals(test_mae, _)
@@ -174,4 +174,5 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 
 	print('Learning Finished!')
 
+	return model
 	
