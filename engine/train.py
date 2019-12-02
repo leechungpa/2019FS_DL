@@ -116,7 +116,7 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 		# if it's lower than those values, store the whole model into h5 file
 		best_mae, _ = load_best_vals()
 
-	else if part == "B":
+	elif part == "B":
 		a_train, a_test, train_dataset, test_dataset = load_datasets()
 		_, best_mae = load_best_vals()
 
