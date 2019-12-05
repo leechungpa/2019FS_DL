@@ -14,7 +14,7 @@ def generate_images(model, test_input = '../ShanghaiTech/part_A/test_data/images
     img = tf.io.read_file(test_input)
     img = tf.image.decode_jpeg(img, channels = 3)
     img = tf.cast(img, tf.float32)
-    img = (img/127.5) - 1 
+    img = img/255.0
     
     gt_path = test_input.replace('.jpg','.h5').replace('images','ground-truth')
     gt_file = h5py.File(gt_path, 'r')

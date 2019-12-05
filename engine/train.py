@@ -168,7 +168,7 @@ def fit(model, part, epochs, learning_rate = 0.0001):
 
 
 		print('Epoch:', '{}'.format(epoch + 1), 
-		      'Test MAE = ', '{:.4f}'.format(test_mae))
+		      'Test MAE = ', '{:.5f}'.format(test_mae))
 
 	# when test_mae is smaller than the stored lowest mae,
 	# store whole model into h5 file
